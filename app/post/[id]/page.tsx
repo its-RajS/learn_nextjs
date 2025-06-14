@@ -6,23 +6,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";
 
-async function getData(id: string) {
+type Params = Promise<{ id: string }>;
+
+async function Page({ params }: { params: Params }) {
   const data = await prisma.blogPost.findFirst({
     where: {
-      id: id,
+      id: (await params).id as string,
     },
   });
 
   //if we dont get the data return 404
   if (!data) return notFound();
-
-  return data;
-}
-
-type Params = Promise<{ id: string }>;
-
-async function page({ params }: { params: Params }) {
-  const data = await getData((await params).id as string);
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 ">
@@ -73,4 +67,4 @@ async function page({ params }: { params: Params }) {
   );
 }
 
-export default page;
+export default Page;

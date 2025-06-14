@@ -3,28 +3,35 @@ import BlogCard from "./components/general/BlogCard";
 import { prisma } from "./utils/prisma";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export async function getData() {
-  const data = await prisma.blogPost.findMany({
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      imageUrl: true,
-      authorId: true,
-      authorName: true,
-      authorImg: true,
-
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-  return data;
+// Move getData function inside the component or make it a separate utility
+async function getData() {
+  try {
+    const data = await prisma.blogPost.findMany({
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        imageUrl: true,
+        authorId: true,
+        authorName: true,
+        authorImg: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch blog posts:", error);
+    return [];
+  }
 }
 
 export default function Home() {
   return (
     <div className="py-4">
-      <h1 className="text-3xl font-bold tracking-tight mb-8"></h1>
+      <h1 className="text-3xl font-bold tracking-tight mb-8">
+        Latest Blog Posts
+      </h1>
       <Suspense fallback={<BlogPostsGrid />}>
         <BlogPost />
       </Suspense>
@@ -34,6 +41,15 @@ export default function Home() {
 
 async function BlogPost() {
   const data = await getData();
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No blog posts found.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.map((item) => {
